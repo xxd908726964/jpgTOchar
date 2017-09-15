@@ -34,5 +34,4 @@ FORMS += \
         widget.ui
 
 RESOURCES += \
-    ico.qrc \
     ico.qrc

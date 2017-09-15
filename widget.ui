@@ -15,14 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="ico.qrc">
-    <normaloff>:/new/prefix1/png</normaloff>
-    <normalon>:/new/prefix1/png</normalon>
-    <disabledoff>:/new/prefix1/png</disabledoff>
-    <disabledon>:/new/prefix1/png</disabledon>
-    <activeoff>:/new/prefix1/png</activeoff>
-    <activeon>:/new/prefix1/png</activeon>
-    <selectedoff>:/new/prefix1/png</selectedoff>
-    <selectedon>:/new/prefix1/png</selectedon>:/new/prefix1/png</iconset>
+    <normaloff>:/new/prefix1/png</normaloff>:/new/prefix1/png</iconset>
   </property>
   <property name="windowOpacity">
    <double>1.000000000000000</double>

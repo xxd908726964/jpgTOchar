@@ -2,7 +2,9 @@
 #include "ui_widget.h"
 
 
-char chs[]={'M','N','Q','$','H','6','E','C','A','7','?','>',' ',' '};
+
+char chs[30]={'M','N','Q','$','H','6','E','C','A','7','?','>','-','.',' ',' '};
+//char chs[]={'M','N','Q','$','H','6','E','C','A','7','?','>',' ',' '};
 
 
 Widget::Widget(QWidget *parent) :
@@ -27,9 +29,25 @@ Widget::Widget(QWidget *parent) :
     layout->addLayout(vbox,0,1);
     vbox->addWidget(open);
 
-    label_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    label_area->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    label_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    label_area->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     label_area->setWidget(label);
+
+    //--------------------------------------字符高度
+
+    ziti_kuaidu_layout=new QHBoxLayout(this);
+    ziti_kuaidu_label=new QLabel(this);
+    ziti_kuaidu=new QSpinBox(this);
+    ziti_kuaidu->setValue(10);
+    ziti_kuaidu->setMaximum(99);
+    ziti_kuaidu->setMinimum(1);
+    ziti_kuaidu_label->setText("字符高度");
+    vbox->addLayout(ziti_kuaidu_layout);
+    ziti_kuaidu_layout->addWidget(ziti_kuaidu);
+    ziti_kuaidu_layout->addWidget(ziti_kuaidu_label);
+    ziti_kuaidu_size=10;
+
+
     //--------------------------------------字符行距
     ziti_hangju_layout=new QHBoxLayout(this);
     ziti_hangju_label=new QLabel(this);
@@ -43,31 +61,53 @@ Widget::Widget(QWidget *parent) :
     ziti_hangju_layout->addWidget(ziti_hangju_label);
     ziti_hangju_size=10;
 
-    //--------------------------------------字符宽度
 
-    ziti_kuaidu_layout=new QHBoxLayout(this);
-    ziti_kuaidu_label=new QLabel(this);
-    ziti_kuaidu=new QSpinBox(this);
-    ziti_kuaidu->setValue(10);
-    ziti_kuaidu->setMaximum(99);
-    ziti_kuaidu->setMinimum(1);
-    ziti_kuaidu_label->setText("字符宽度");
-    vbox->addLayout(ziti_kuaidu_layout);
-    ziti_kuaidu_layout->addWidget(ziti_kuaidu);
-    ziti_kuaidu_layout->addWidget(ziti_kuaidu_label);
-    ziti_kuaidu_size=10;
+    //--------------------------------------字符间距
+
+    ziti_jianju_layout=new QHBoxLayout(this);
+    ziti_jianju_label=new QLabel(this);
+    ziti_jianju=new QSpinBox(this);
+    ziti_jianju->setValue(10);
+    ziti_jianju->setMaximum(99);
+    ziti_jianju->setMinimum(1);
+    ziti_jianju_label->setText("字符间距");
+    vbox->addLayout(ziti_jianju_layout);
+    ziti_jianju_layout->addWidget(ziti_jianju);
+    ziti_jianju_layout->addWidget(ziti_jianju_label);
+    ziti_jianju_size=10;
+
 
     //------------------------------------------------------
 
+    shiyong_moren_zf=new QCheckBox(this);
+    shiyong_moren_zf->setText("自定义转换字符\n左字符转换暗部");
+    vbox->addWidget(shiyong_moren_zf);
+    shiyong_moren_zf->setChecked(false);
+    zhifuchan=new QLineEdit(this);
+    zhifuchan->setMaximumSize(110,30);
+    zhifuchan->setPlaceholderText("输入英文字符");
+    zhifuchan->setEnabled(false);
+    shiyong_moren_zf_zhuangtai=false;
+
+
+    vbox->addWidget(shiyong_moren_zf);
+
+    vbox->addWidget(zhifuchan);
+
+
+
     zhuanhuai=new QPushButton(this);
     zhuanhuai->setText("开始转换");
-    zhuanhuai->setMaximumSize(110,30);
+    zhuanhuai->setMinimumSize(110,60);
+    zhuanhuai->setMaximumSize(110,60);
     vbox->addWidget(zhuanhuai);
 
-    save=new QPushButton(this);
-    save->setText("保存图片");
-    save->setMaximumSize(110,30);
-    vbox->addWidget(save);
+    jingdutiao=new QProgressBar(this);
+    jingdutiao->setMaximumSize(110,30);
+    jingdutiao->setValue(0);
+    vbox->addWidget(jingdutiao);
+
+
 
     gaibian_xiansi_cicun=new QCheckBox(this);
     vbox->addWidget(gaibian_xiansi_cicun);
@@ -77,13 +117,16 @@ Widget::Widget(QWidget *parent) :
     vbox->addWidget(gaibian_xiansi_tupian);
     gaibian_xiansi_tupian->setText("显示原始图片");
 
+
+    save=new QPushButton(this);
+    save->setText("保存图片");
+    save->setMaximumSize(110,30);
+    vbox->addWidget(save);
+
     image_new=NULL;
     image_old=NULL;
 
-    jingdutiao=new QProgressBar(this);
-    jingdutiao->setMaximumSize(110,30);
-    jingdutiao->setValue(0);
-    vbox->addWidget(jingdutiao);
+
 
 
     vbox->addStretch();
@@ -99,7 +142,7 @@ Widget::Widget(QWidget *parent) :
             this,SLOT(gaibian_xiansi_tupian_(bool)),
             Qt::AutoConnection);
     connect(this,SIGNAL(jingdutiao_signal(int)),jingdutiao,SLOT(setValue(int)),Qt::AutoConnection);
-
+    connect(shiyong_moren_zf,SIGNAL(clicked(bool)),this,SLOT(zhifuchan_E(bool)),Qt::AutoConnection);
 
 
     ui->setupUi(this);
@@ -122,6 +165,21 @@ void Widget::zhuan()
 
     QPainter *painter=new QPainter(image_new);
 
+    QByteArray a=zhifuchan->text().toLatin1();
+    char *chs_temp=chs;
+    int color_m=42;
+    if(shiyong_moren_zf->isChecked())
+    {
+        if(zhifuchan->text().size()>29)
+        {
+            QMessageBox::information(this,"信息","输入字符串太长。        ",QMessageBox::Ok);
+            return;
+        }
+        chs_temp=a.data();
+        chs_temp[zhifuchan->text().size()]=' ';
+        color_m=255/zhifuchan->text().size()*3;
+
+    }
 
 
 
@@ -129,7 +187,7 @@ void Widget::zhuan()
     {
         int x=0;
 
-        for(;x<=image_old->width();x+=ziti_kuaidu_size)
+        for(;x<=image_old->width();x+=ziti_jianju_size)
         {
             QPointF pos;
             pos.setX(x);
@@ -142,8 +200,8 @@ void Widget::zhuan()
             painter->setPen(pen);
             painter->setFont(font);
 
-            int ch=(color.red()+color.green()+color.blue())/42;
-            painter->drawText(pos,QString(chs[ch]));
+            int ch=(color.red()+color.green()+color.blue())/color_m;
+            painter->drawText(pos,QString(chs_temp[ch]));
 
         }
         emit jingdutiao_signal(qRound(((float)(x*y)/(image_new->height()*image_new->width())*100)));
@@ -157,12 +215,15 @@ void Widget::zhuan()
         label->setGeometry(0,0,label_area->geometry().width(),label_area->geometry().height());
         label->setPixmap(QPixmap::fromImage(*temp));
         gaibian_xiansi_tupian->setChecked(false);
-
+        emit jingdutiao_signal(100);
+        delete temp;
+        temp=NULL;
         return;
     }
     label->setGeometry(0,0,image_new->width(),image_old->height());
     label->setPixmap(QPixmap::fromImage(*image_new));
     gaibian_xiansi_tupian->setChecked(false);
+    emit jingdutiao_signal(100);
     return;
 
 }
@@ -174,53 +235,7 @@ void Widget::openfile()
                                           QString(QCoreApplication::applicationDirPath()),
                                           QString("*.jpg *.gif"));
     if(filename.isEmpty())return;
-    //gif--------gif--------gif--------gif--------gif--------gif--------gif--------gif--------gif
-    if((filename.contains(".gif")));
-    {
 
-        gif_old=new QMovie(filename);
-        gif_old->jumpToFrame(2);
-qDebug()<<gif_old->scaledSize();
-        if(gaibian_xiansi_cicun->isChecked())
-        {
-
-//            QSize scal;
-//            if(qAbs(gif_old->frameRect().width()-label_area->geometry().width())
-//                    >qAbs(gif_old->frameRect().height()-label_area->geometry().height()))
-//            scal=QSize(gif_old->frameRect().width()*(label_area->geometry().height()/gif_old->frameRect().height()),
-//                       gif_old->frameRect().height()*(label_area->geometry().height()/gif_old->frameRect().height()));
-
-//            scal=QSize(gif_old->frameRect().width()*(label_area->geometry().width()/gif_old->frameRect().width()),
-//                       gif_old->frameRect().height()*(label_area->geometry().width()/gif_old->frameRect().width()));
-
-//        qDebug()<<scal;
-//             gif_old->setScaledSize(scal);
-
-            label->setGeometry(0,0,label_area->geometry().width(),label_area->geometry().height());
-            label->setMovie(gif_old);
-            gif_old->start();
-
-            zhuan_over=1;
-            gaibian_xiansi_tupian->setChecked(true);
-            if(gif_new!=NULL)
-            {
-                delete image_new;
-                gif_new=NULL;
-            }
-            return;
-        }
-        label->setGeometry(0,0,image_old->width(), image_old->height());
-        label->setPixmap(QPixmap::fromImage(*image_old));
-        zhuan_over=1;
-        gaibian_xiansi_tupian->setChecked(true);
-        if(image_new!=NULL)
-        {
-            delete image_new;
-            image_new=NULL;
-        }
-        return;
-    }
-    //gif--------gif--------gif--------gif--------gif--------gif--------gif--------gif--------gif
     image_old=new QImage;
     image_old->load(filename);
     if(gaibian_xiansi_cicun->isChecked())
@@ -376,27 +391,43 @@ void Widget::gaibian_xiansi_tupian_(bool a)
 
 void Widget::zhuan_run_pthread()
 {
-    if(image_old==NULL
-            &&ziti_hangju_size==ziti_hangju->text().toInt()
-            &&ziti_kuaidu_size==ziti_kuaidu->text().toInt() )
+    if(image_old==NULL )
     {
         QMessageBox::information(this,"信息","请先加载图像。        ",QMessageBox::Ok);
         return;
     }
     if(image_new!=NULL&&zhuan_over!=1
             &&ziti_hangju_size==ziti_hangju->text().toInt()
-            &&ziti_kuaidu_size==ziti_kuaidu->text().toInt())
+            &&ziti_kuaidu_size==ziti_kuaidu->text().toInt()
+            &&ziti_jianju_size==ziti_jianju->text().toInt()
+            &&(shiyong_moren_zf_zhuangtai==shiyong_moren_zf->isChecked())
+            &&(shiyong_moren_zf_temp==zhifuchan->text()))
     {
         QMessageBox::information(this,"信息","图像已经转换完成。        ",QMessageBox::Ok);
         return;
     }
 
+
     ziti_hangju_size=ziti_hangju->text().toInt();
     ziti_kuaidu_size=ziti_kuaidu->text().toInt();
-
+    ziti_jianju_size=ziti_jianju->text().toInt();
+    shiyong_moren_zf_zhuangtai=shiyong_moren_zf->isChecked();
+    shiyong_moren_zf_temp=zhifuchan->text();
 
     jingdutiao->setValue(0);
     QtConcurrent::run(this,&zhuan);
 
+}
+
+void Widget::zhifuchan_E(bool a)
+{
+    zhifuchan->setEnabled(a);
+    if(a)
+    {
+        zhifuchan->setText("MNQ$H6ECA7?>-.  ");
+        return;
+    }
+    zhifuchan->setText("");
+    return;
 }
 

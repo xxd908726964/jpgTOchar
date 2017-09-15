@@ -23,6 +23,7 @@
 #include<QDesktopWidget>
 #include<QSpinBox>
 #include<QMovie>
+#include<QLineEdit>
 
 
 namespace Ui {
@@ -44,6 +45,7 @@ public slots:
     void gaibian_xiansi(bool a);
     void gaibian_xiansi_tupian_(bool a);
     void zhuan_run_pthread();
+    void zhifuchan_E(bool a);
 
 signals:
     void jingdutiao_signal(int x);
@@ -67,17 +69,26 @@ private:
     QRect old_rect;
     QSize size_old;
     QProgressBar* jingdutiao;
-    QDesktopWidget *top_window;
 
     QSpinBox *ziti_kuaidu;
     QSpinBox *ziti_hangju;
+    QSpinBox *ziti_jianju;
     QHBoxLayout *ziti_hangju_layout;
     QHBoxLayout *ziti_kuaidu_layout;
+    QHBoxLayout *ziti_jianju_layout;
     QLabel *ziti_hangju_label;
     QLabel *ziti_kuaidu_label;
+    QLabel *ziti_jianju_label;
     int ziti_hangju_size;
     int ziti_kuaidu_size;
-    int image_type;
+    int ziti_jianju_size;
+
+
+    QCheckBox *shiyong_moren_zf;
+    QLineEdit *zhifuchan;
+    bool shiyong_moren_zf_zhuangtai;
+    QString shiyong_moren_zf_temp;
+
     QMovie *gif_old;
     QMovie *gif_new;
 };
