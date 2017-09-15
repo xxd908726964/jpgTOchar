@@ -1,5 +1,1 @@
-<RCC>
-    <qresource prefix="/new/prefix1">
-        <file alias="png">timg.png</file>
-    </qresource>
-</RCC>
+<RCC/>
