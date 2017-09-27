@@ -20,7 +20,7 @@ Widget::Widget(QWidget *parent) :
 
     open=new QPushButton(this);
     open->setMaximumSize(110,30);
-    open->setText("选择文件");
+    open->setText("打开文件");
 
     layout=new QGridLayout(this);
     vbox=new QVBoxLayout(this);
@@ -273,6 +273,11 @@ void Widget::openfile()
 
 void Widget::savefile()
 {
+    if(image_new==NULL)
+    {
+        QMessageBox::warning(this,"警告","没有图片可以保存，你可以-->>打开文件-->>开始转换",QMessageBox::Ok);
+        return;
+    }
     filename=QFileDialog::getSaveFileName(this,QString("保存文件"),filename,QString("*.jpg"));
     if(filename.isEmpty())return;
     image_new->save(filename);
