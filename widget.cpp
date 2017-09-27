@@ -15,7 +15,7 @@ Widget::Widget(QWidget *parent) :
     setMinimumSize( 600,500);
 
     label_area=new QScrollArea(this);
-    label=new QLabel(this);
+    label=new QLabel(label_area);
 
 
     open=new QPushButton(this);
@@ -29,8 +29,8 @@ Widget::Widget(QWidget *parent) :
     layout->addLayout(vbox,0,1);
     vbox->addWidget(open);
 
-    label_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    label_area->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    label_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    label_area->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     label_area->setWidget(label);
 
     //--------------------------------------字符高度
@@ -158,7 +158,12 @@ Widget::~Widget()
 
 void Widget::zhuan()
 {
+    if(image_new!=NULL)
 
+    {
+        delete image_new;
+
+    }
     zhuan_over=0;
     size_old=image_old->size();
     image_new=new QImage(size_old,QImage::Format_ARGB32);
@@ -181,7 +186,14 @@ void Widget::zhuan()
 
     }
 
+    image_new->fill(Qt::white);
+    QPen pen= painter->pen();
 
+    pen.setColor(Qt::black);
+    QFont font=painter->font();
+    font.setPixelSize(ziti_kuaidu_size);
+    painter->setPen(pen);
+    painter->setFont(font);
 
     for(int y=ziti_hangju_size;y<=image_old->height();y+=ziti_hangju_size)
     {
@@ -193,37 +205,28 @@ void Widget::zhuan()
             pos.setX(x);
             pos.setY(y);
             QColor color=image_old->pixelColor(x,y);
-            QPen pen= painter->pen();
-            pen.setColor(Qt::black);
-            QFont font=painter->font();
-            font.setPixelSize(ziti_kuaidu_size);
-            painter->setPen(pen);
-            painter->setFont(font);
 
             int ch=(color.red()+color.green()+color.blue())/color_m;
             painter->drawText(pos,QString(chs_temp[ch]));
 
         }
         emit jingdutiao_signal(qRound(((float)(x*y)/(image_new->height()*image_new->width())*100)));
+        emit jingdutiao_signal(100);
     }
-
+    delete painter ;
     if(gaibian_xiansi_cicun->isChecked())
     {
-        QSize scal(label_area->geometry().width(),label_area->geometry().height());
-        QImage *temp=new QImage;
-        *temp=image_new->scaled(scal,Qt::KeepAspectRatio);
-        label->setGeometry(0,0,label_area->geometry().width(),label_area->geometry().height());
-        label->setPixmap(QPixmap::fromImage(*temp));
+        QSize scal(label_area->geometry().width()-10,label_area->geometry().height()-10);
+
+        label->setGeometry(0,0,label_area->geometry().width()-10,label_area->geometry().height()-10);
+        label->setPixmap(QPixmap::fromImage(image_new->scaled(scal,Qt::KeepAspectRatio)));
         gaibian_xiansi_tupian->setChecked(false);
-        emit jingdutiao_signal(100);
-        delete temp;
-        temp=NULL;
+
         return;
     }
     label->setGeometry(0,0,image_new->width(),image_old->height());
     label->setPixmap(QPixmap::fromImage(*image_new));
     gaibian_xiansi_tupian->setChecked(false);
-    emit jingdutiao_signal(100);
     return;
 
 }
@@ -241,10 +244,10 @@ void Widget::openfile()
     if(gaibian_xiansi_cicun->isChecked())
     {
 
-        QSize scal(label_area->geometry().width(),label_area->geometry().height());
+        QSize scal(label_area->geometry().width()-10,label_area->geometry().height()-10);
         QImage *temp=new QImage;
         *temp=image_old->scaled(scal,Qt::KeepAspectRatio);
-        label->setGeometry(0,0,label_area->geometry().width(),label_area->geometry().height());
+        label->setGeometry(0,0,label_area->geometry().width()-10,label_area->geometry().height()-10);
         label->setPixmap(QPixmap::fromImage(*temp));
         zhuan_over=1;
         gaibian_xiansi_tupian->setChecked(true);
@@ -297,20 +300,20 @@ void Widget::gaibian_xiansi(bool a)
         if(gaibian_xiansi_tupian->isChecked())
         {
 
-            QSize scal(label_area->geometry().width(),label_area->geometry().height());
+            QSize scal(label_area->geometry().width()-10,label_area->geometry().height()-10);
             QImage *temp=new QImage;
             *temp=image_old->scaled(scal,Qt::KeepAspectRatio);
-            label->setGeometry(0,0,label_area->geometry().width(),label_area->geometry().height());
+            label->setGeometry(0,0,label_area->geometry().width()-10,label_area->geometry().height()-10);
             label->setPixmap(QPixmap::fromImage(*temp));
 
 
 
             return;
         }
-        QSize scal(label_area->geometry().width(),label_area->geometry().height());
+        QSize scal(label_area->geometry().width()-10,label_area->geometry().height()-10);
         QImage *temp=new QImage;
         *temp=image_new->scaled(scal,Qt::KeepAspectRatio);
-        label->setGeometry(0,0,label_area->geometry().width(),label_area->geometry().height());
+        label->setGeometry(0,0,label_area->geometry().width()-10,label_area->geometry().height()-10);
         label->setPixmap(QPixmap::fromImage(*temp));
 
 
@@ -356,10 +359,10 @@ void Widget::gaibian_xiansi_tupian_(bool a)
         }
         if(gaibian_xiansi_cicun->isChecked())
         {
-            QSize scal(label_area->geometry().width(),label_area->geometry().height());
+            QSize scal(label_area->geometry().width()-10,label_area->geometry().height()-10);
             QImage *temp=new QImage;
             *temp=image_old->scaled(scal,Qt::KeepAspectRatio);
-            label->setGeometry(0,0,label_area->geometry().width(),label_area->geometry().height());
+            label->setGeometry(0,0,label_area->geometry().width()-10,label_area->geometry().height()-10);
             label->setPixmap(QPixmap::fromImage(*temp));
             return;
         }
@@ -376,10 +379,10 @@ void Widget::gaibian_xiansi_tupian_(bool a)
         }
         if(gaibian_xiansi_cicun->isChecked())
         {
-            QSize scal(label_area->geometry().width(),label_area->geometry().height());
+            QSize scal(label_area->geometry().width()-10,label_area->geometry().height()-10);
             QImage *temp=new QImage;
             *temp=image_new->scaled(scal,Qt::KeepAspectRatio);
-            label->setGeometry(0,0,label_area->geometry().width(),label_area->geometry().height());
+            label->setGeometry(0,0,label_area->geometry().width()-10,label_area->geometry().height()-10);
             label->setPixmap(QPixmap::fromImage(*temp));
             return;
         }
@@ -415,7 +418,7 @@ void Widget::zhuan_run_pthread()
     shiyong_moren_zf_temp=zhifuchan->text();
 
     jingdutiao->setValue(0);
-    QtConcurrent::run(this,&zhuan);
+    QtConcurrent::run(this,&Widget::zhuan);
 
 }
 
